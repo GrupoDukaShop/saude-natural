@@ -1,6 +1,9 @@
 'use client';
 
 import { useEffect } from 'react';
+import { track } from '@vercel/analytics';
+
+const CHECKOUT_URL = 'https://pay.cakto.com.br/3ct27k5_1110487';
 
 export default function LandingPage({ markup }) {
   useEffect(() => {
@@ -55,6 +58,23 @@ export default function LandingPage({ markup }) {
       faqHandlers.push([question, handler]);
     });
 
+    const checkoutLinks = document.querySelectorAll(`a[href="${CHECKOUT_URL}"]`);
+    const checkoutHandlers = [];
+    const checkoutTimers = [];
+    checkoutLinks.forEach((link) => {
+      const handler = (event) => {
+        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+        event.preventDefault();
+        track('checkout_click', { placement: link.className || 'checkout-link' });
+        checkoutTimers.push(
+          window.setTimeout(() => window.location.assign(CHECKOUT_URL), 500)
+        );
+      };
+      link.addEventListener('click', handler);
+      checkoutHandlers.push([link, handler]);
+    });
+
     const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
     topButton?.addEventListener('click', scrollToTop);
     window.addEventListener('scroll', updateScrollState, { passive: true });
@@ -63,6 +83,8 @@ export default function LandingPage({ markup }) {
     return () => {
       observer?.disconnect();
       faqHandlers.forEach(([question, handler]) => question.removeEventListener('click', handler));
+      checkoutHandlers.forEach(([link, handler]) => link.removeEventListener('click', handler));
+      checkoutTimers.forEach((timer) => window.clearTimeout(timer));
       topButton?.removeEventListener('click', scrollToTop);
       window.removeEventListener('scroll', updateScrollState);
     };
