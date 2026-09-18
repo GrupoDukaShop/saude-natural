@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { track } from '@vercel/analytics';
 
-const CHECKOUT_URL = 'https://pay.cakto.com.br/3ct27k5_1110487';
+const CHECKOUT_PATH = '/checkout';
 
 export default function LandingPage({ markup }) {
   useEffect(() => {
@@ -58,7 +58,7 @@ export default function LandingPage({ markup }) {
       faqHandlers.push([question, handler]);
     });
 
-    const checkoutLinks = document.querySelectorAll(`a[href="${CHECKOUT_URL}"]`);
+    const checkoutLinks = document.querySelectorAll(`a[href="${CHECKOUT_PATH}"]`);
     const checkoutHandlers = [];
     const checkoutTimers = [];
     checkoutLinks.forEach((link) => {
@@ -67,9 +67,7 @@ export default function LandingPage({ markup }) {
 
         event.preventDefault();
         track('checkout_click', { placement: link.className || 'checkout-link' });
-        checkoutTimers.push(
-          window.setTimeout(() => window.location.assign(CHECKOUT_URL), 500)
-        );
+        checkoutTimers.push(window.setTimeout(() => window.location.assign(CHECKOUT_PATH), 0));
       };
       link.addEventListener('click', handler);
       checkoutHandlers.push([link, handler]);
